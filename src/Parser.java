@@ -1,34 +1,90 @@
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.Scanner;
 
+/**
+ * Parses a given file to manage song records.
+ * 
+ * @author Nate Axt <nate6>
+ *         Julie Tran <juliet12>
+ * @version 12.7.2017
+ */
 public class Parser {
     private Scanner sc;
 
+    /**
+     * Creates scanner
+     * @param file location
+     */
     public Parser(String file) {
-        sc = new Scanner(file);
+        sc = null;
+        try {
+            sc = new Scanner(new File(file));
+        } 
+        catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
     }
     
+    /**
+     * Parses the file and initiates methods
+     * @param db database to manage records
+     */
     public void parse(Database db) {
         while (sc.hasNext()) {
             String line = sc.next();
-            String[] words = line.split(" ");
-            if (words[0].equals("insert")) {
+            String[] allWords = line.split(" ");
+            String[] words = null;
+            
+            if (allWords[0].equals("insert") || 
+                    allWords[0].equals("delete")) {
+                words = new String[2];
+                words[0] = allWords[0];
+                words[1] = "";
+                for (int i = 1; i < allWords.length; i++) {
+                    words[1] += allWords[i];
+                    if (i < allWords.length - 1) {
+                        words[1] += " ";
+                    }
+                }
+            }
+            else if (allWords[0].equals("remove") ||
+                    allWords[0].equals("list")) {
+                words = new String[3];
+                words[0] = allWords[0];
+                words[1] = allWords[1];
+                words[2] = "";
+                for (int i = 2; i < allWords.length; i++) {
+                    words[2] += allWords[i];
+                    if (i < allWords.length - 1) {
+                        words[2] += " ";
+                    }
+                }
+            }
+            
+            if (allWords[0].equals("insert")) {
                 insert(db, words);
             }
-            else if (words[0].equals("remove")) {
+            else if (allWords[0].equals("remove")) {
                 remove(db, words);
             }
-            else if (words[0].equals("print")) {
-                print(db, words);
+            else if (allWords[0].equals("print")) {
+                print(db, allWords);
             }
-            else if (words[0].equals("list")) {
+            else if (allWords[0].equals("list")) {
                 list(db, words);
             }
-            else if (words[0].equals("delete")) {
+            else if (allWords[0].equals("delete")) {
                 delete(db, words);
             }
         }
     }
 
+    /**
+     * Inserts song into db.
+     * @param db database to manage records
+     * @param words song info
+     */
     private void insert(Database db, String[] words) {
         String[] names = words[1].split("<SEP>");
         int[] handles = db.insert(names[0], names[1]);
@@ -73,6 +129,11 @@ public class Parser {
         //TODO print if expanded?
     }
 
+    /**
+     * Removes all records of the given string
+     * @param db database to manage records
+     * @param words records info
+     */
     private void remove(Database db, String[] words) {
         String[] removed = null;
         Type type = null;
@@ -136,6 +197,11 @@ public class Parser {
         
     }
 
+    /**
+     * Prints all records of a type
+     * @param db database to manage records
+     * @param words type
+     */
     private void print(Database db, String[] words) {
         if (words[1].equals("artist")) {
             String[] artists = db.print(Type.ARTIST);
@@ -162,12 +228,36 @@ public class Parser {
             }
         }
         else if (words[1].equals("tree")) {
-            //TODO use BST iterator
+            System.out.println("Printing artist tree:");
+            BST.Iterator aIter = db.printTree(Type.ARTIST);
+            printTree(db, aIter, Type.ARTIST);
+            
+            System.out.println("Printing song tree:");
+            BST.Iterator sIter = db.printTree(Type.SONG);
+            printTree(db, sIter, Type.SONG);
         }
-        
-        //TODO Printing tree or Printing BST?
+    }
+    
+    /**
+     * Prints a tree of positions in memory.
+     * @param db database to manage records
+     * @param iter tree iterator
+     * @param type artist or song
+     */
+    private void printTree(Database db, BST.Iterator iter, Type type) {
+        while (iter.hasNext()) {
+            KVPair pair = iter.next();
+            int k = db.getMemoryPos(type, pair.getKey().getHash());
+            int v = db.getMemoryPos(type, pair.getValue().getHash());
+            System.out.println("(" + k + "," + v + ")");
+        }
     }
 
+    /**
+     * Lists all the records of the given info.
+     * @param db database to manage records
+     * @param words record info
+     */
     private void list(Database db, String[] words) {
         String[] listings = null;
         if (words[1].equals("artist")) {
@@ -182,6 +272,11 @@ public class Parser {
         }
     }
 
+    /**
+     * Deletes a given record
+     * @param db database to manage records
+     * @param words record info
+     */
     private void delete(Database db, String[] words) {
         String[] names = words[1].split("<SEP>");
         int[] deleted = db.delete(names[0], names[1]);

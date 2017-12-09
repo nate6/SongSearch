@@ -86,9 +86,9 @@ public class HashTable implements HashTableInterface {
     }
 
     /**
-     * Gets the string record for the given hashcode.
+     * Gets the pos in memory for the record for the given hashcode.
      * @param hashCode for string
-     * @return the string that goes with this hashcode
+     * @return the pos in memory that goes with this hashcode
      */
     @Override
     public String get(int hashCode) {
@@ -97,6 +97,16 @@ public class HashTable implements HashTableInterface {
             return null;
         }
         return mem.getString(pos);
+    }
+
+    /**
+     * Gets the string record for the given hashcode.
+     * @param hashCode for string
+     * @return the string that goes with this hashcode
+     */
+    @Override
+    public int getMemPos(int hashCode) {
+        return handles[hashCode];
     }
     
     /**

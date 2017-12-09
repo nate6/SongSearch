@@ -59,7 +59,9 @@ public class HashTableTest {
     public void testGet() {
         t.insert("a");
         assertEquals("a", t.get(97));
+        assertEquals(0, t.getMemPos(97));
         t.insert("hsfd");
+        assertEquals(4, t.getMemPos(t.find("hsfd")));
         assertEquals(null, t.get(98));
         t.delete("a");
         assertEquals(null, t.get(97));

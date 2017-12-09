@@ -1,4 +1,11 @@
 
+/**
+ * 
+ * 
+ * @author Nate Axt <nate6>
+ *         Julie Tran <juliet12>
+ * @version 12.7.2017
+ */
 public class Database {
     private HashTable artistTable;
     private HashTable songTable;
@@ -101,17 +108,24 @@ public class Database {
         return i;
     }
     
-    public BST printTree() {
-        
-        return null;
+    public BST.Iterator printTree(Type type) {
+        if (type == Type.ARTIST) {
+            return artistTree.getIterator();
+        }
+        return songTree.getIterator();
     }
 
     public boolean exists(Type type, String string) {
         if (type == Type.ARTIST) {
             return artistTable.find(string) > 0;
         }
-        else {
-            return songTable.find(string) > 0;
+        return songTable.find(string) > 0;
+    }
+    
+    public int getMemoryPos(Type type, int hash) {
+        if (type == Type.ARTIST) {
+            return artistTable.getMemPos(hash);
         }
+        return songTable.getMemPos(hash);
     }
 }
